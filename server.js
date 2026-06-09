@@ -26,6 +26,7 @@ io.on('connection', (socket) => {
 
     const { game } = room;
     const result = game.makeMove(index);
+    console.log('makeMove result:', JSON.stringify(result));
     if (!result.valid) return;
 
     io.to(roomId).emit('move-made', {
@@ -34,12 +35,16 @@ io.on('connection', (socket) => {
       board: result.board,
     });
 
-    if (result.over) {
+    if (result.winner || result.isDraw) {
+      console.log('Émission game-over :', result.winner || 'draw');
       io.to(roomId).emit('game-over', {
-        winner: result.winner,
+        winner: result.winner ?? null,
         winningLine: result.winningLine ?? null,
         board: result.board,
       });
+      activeGames.delete(roomId);
+      socketRoom.delete(room.players[0].id);
+      socketRoom.delete(room.players[1].id);
     }
   });
 

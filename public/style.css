@@ -103,6 +103,11 @@ h1 {
   100% { transform: scale(1); }
 }
 
+.cell.winner {
+  background: #1e3a28;
+  border-color: #4caf74;
+}
+
 #replay-btn[hidden] {
   display: none;
 }

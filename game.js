@@ -25,7 +25,8 @@ class TicTacToeGame {
       this.currentTurn = symbol === 'X' ? 'O' : 'X';
     }
 
-    return { valid: true, symbol, winner, isDraw, board: this.board };
+    const winningLine = winner ? this._getWinningLine() : null;
+    return { valid: true, symbol, winner, isDraw, winningLine, board: this.board };
   }
 
   getState() {
@@ -36,6 +37,16 @@ class TicTacToeGame {
     for (const [a, b, c] of WINNING_LINES) {
       if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
         return this.board[a];
+      }
+    }
+    return null;
+  }
+
+  _getWinningLine() {
+    for (const line of WINNING_LINES) {
+      const [a, b, c] = line;
+      if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
+        return line;
       }
     }
     return null;
