@@ -1,0 +1,108 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: #0f1117;
+  color: #e8eaf0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+}
+
+#status {
+  font-size: 1rem;
+  color: #9095a8;
+  min-height: 1.5em;
+  text-align: center;
+}
+
+#find-game-btn,
+#replay-btn {
+  padding: 12px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #4f6ef7;
+  color: #ffffff;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#find-game-btn:hover,
+#replay-btn:hover {
+  background: #3a57e8;
+  transform: translateY(-1px);
+}
+
+#find-game-btn:active,
+#replay-btn:active {
+  transform: translateY(0);
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 6px;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  background: #1c2030;
+  border: 2px solid #2e3347;
+  border-radius: 10px;
+  font-size: 2.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell:empty:hover {
+  background: #242840;
+  border-color: #4f6ef7;
+}
+
+.cell:disabled {
+  cursor: default;
+}
+
+.cell.x {
+  color: #4f8ef7;
+}
+
+.cell.o {
+  color: #f75a5a;
+}
+
+.cell.placed {
+  animation: pop 0.18s ease-out;
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.6); }
+  70%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+#replay-btn[hidden] {
+  display: none;
+}
