@@ -30,7 +30,6 @@ io.on('connection', (socket) => {
     if (symbols[socket.id] !== game.currentTurn) return;
 
     const result = game.makeMove(index);
-    console.log('makeMove result:', JSON.stringify(result));
     if (!result.valid) return;
 
     io.to(roomId).emit('move-made', {
@@ -40,7 +39,6 @@ io.on('connection', (socket) => {
     });
 
     if (result.winner || result.isDraw) {
-      console.log('Émission game-over :', result.winner || 'draw');
       io.to(roomId).emit('game-over', {
         winner: result.winner ?? null,
         winningLine: result.winningLine ?? null,

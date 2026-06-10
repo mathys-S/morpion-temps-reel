@@ -1,24 +1,23 @@
 const socket = io();
 
 const statusEl = document.getElementById('status');
-const findBtn = document.getElementById('find-game-btn');
+const findBtn  = document.getElementById('find-game-btn');
 const replayBtn = document.getElementById('replay-btn');
 const cells = document.querySelectorAll('.cell');
 
 let mySymbol = null;
-let roomId = null;
-let myTurn = false;
+let roomId   = null;
+let myTurn   = false;
 
 // --- Helpers ---
 
-function setStatus(text) {
+function setStatus(text, ...classes) {
   statusEl.textContent = text;
+  statusEl.className = classes.filter(Boolean).join(' ');
 }
 
 function enableBoard(enabled) {
-  cells.forEach(cell => {
-    cell.disabled = !enabled;
-  });
+  cells.forEach(cell => { cell.disabled = !enabled; });
 }
 
 function resetBoard() {
@@ -29,26 +28,35 @@ function resetBoard() {
   });
 }
 
+function resetFindBtn() {
+  findBtn.disabled = false;
+  findBtn.classList.remove('searching');
+  findBtn.textContent = 'Trouver une partie';
+}
+
 function showReplay() {
   replayBtn.hidden = false;
   findBtn.hidden = true;
+  resetFindBtn();
 }
 
 function startSearch() {
   resetBoard();
   replayBtn.hidden = true;
-  findBtn.hidden = true;
+  findBtn.hidden = false;
+  findBtn.disabled = true;
+  findBtn.classList.add('searching');
+  findBtn.textContent = 'Recherche…';
   mySymbol = null;
-  roomId = null;
-  myTurn = false;
-  setStatus('Recherche d\'un adversaire...');
+  roomId   = null;
+  myTurn   = false;
+  setStatus('Recherche d’un adversaire…');
   socket.emit('find-game');
 }
 
 // --- Boutons ---
 
 findBtn.addEventListener('click', startSearch);
-
 replayBtn.addEventListener('click', startSearch);
 
 // --- Cases du plateau ---
@@ -64,42 +72,44 @@ cells.forEach(cell => {
 // --- Événements serveur ---
 
 socket.on('waiting', () => {
-  setStatus('En attente d\'un autre joueur...');
+  setStatus('En attente d’un autre joueur…');
 });
 
 socket.on('game-start', ({ symbol, roomId: id }) => {
   mySymbol = symbol;
-  roomId = id;
-  myTurn = symbol === 'X';
+  roomId   = id;
+  myTurn   = symbol === 'X';
+  resetFindBtn();
   findBtn.hidden = true;
   enableBoard(myTurn);
-  setStatus(myTurn ? `C'est votre tour (${mySymbol})` : `Tour de l'adversaire (${mySymbol})`);
+
+  const opponentSymbol = mySymbol === 'X' ? 'O' : 'X';
+  if (myTurn) {
+    setStatus(`C’est votre tour (${mySymbol})`, 'my-turn', `turn-${mySymbol.toLowerCase()}`);
+  } else {
+    setStatus(`Tour de l’adversaire`, `turn-${opponentSymbol.toLowerCase()}`);
+  }
 });
 
-socket.on('move-made', ({ index, symbol, board }) => {
+socket.on('move-made', ({ index, symbol }) => {
   const cell = cells[index];
   cell.textContent = symbol;
   cell.classList.add(symbol.toLowerCase(), 'placed');
-
-  // Retire la classe d'animation après qu'elle soit jouée
   cell.addEventListener('animationend', () => cell.classList.remove('placed'), { once: true });
 
   myTurn = symbol !== mySymbol;
   enableBoard(false);
 
+  const opponentSymbol = mySymbol === 'X' ? 'O' : 'X';
   if (myTurn) {
-    // Réactive uniquement les cases vides
-    cells.forEach(c => {
-      if (c.textContent === '') c.disabled = false;
-    });
-    setStatus(`C'est votre tour (${mySymbol})`);
+    cells.forEach(c => { if (c.textContent === '') c.disabled = false; });
+    setStatus(`C’est votre tour (${mySymbol})`, 'my-turn', `turn-${mySymbol.toLowerCase()}`);
   } else {
-    setStatus(`Tour de l'adversaire`);
+    setStatus(`Tour de l’adversaire`, `turn-${opponentSymbol.toLowerCase()}`);
   }
 });
 
 socket.on('game-over', ({ winner, winningLine }) => {
-  console.log('game-over reçu', { winner, winningLine });
   enableBoard(false);
 
   if (winningLine) {
@@ -107,11 +117,11 @@ socket.on('game-over', ({ winner, winningLine }) => {
   }
 
   if (!winner) {
-    setStatus('Match nul !');
+    setStatus('Match nul !', 'result-draw');
   } else if (winner === mySymbol) {
-    setStatus('Vous avez gagné !');
+    setStatus('Vous avez gagné !', 'result-win');
   } else {
-    setStatus('Vous avez perdu.');
+    setStatus('Vous avez perdu.', 'result-lose');
   }
 
   showReplay();
@@ -119,6 +129,6 @@ socket.on('game-over', ({ winner, winningLine }) => {
 
 socket.on('opponent-left', () => {
   enableBoard(false);
-  setStatus('Adversaire déconnecté.');
+  setStatus('Adversaire déconnecté.', 'result-lose');
   showReplay();
 });
