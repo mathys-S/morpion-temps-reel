@@ -37,7 +37,7 @@ function showReplay() {
 function startSearch() {
   resetBoard();
   replayBtn.hidden = true;
-  findBtn.hidden = false;
+  findBtn.hidden = true;
   mySymbol = null;
   roomId = null;
   myTurn = false;

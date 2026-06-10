@@ -5,6 +5,9 @@ const activeGames = new Map();   // roomId -> { game, players: [socketA, socketB
 const socketRoom = new Map();    // socketId -> roomId
 
 function addToQueue(socket, io) {
+  // Refuse si le joueur est déjà en file ou en partie
+  if (queue.includes(socket) || socketRoom.has(socket.id)) return;
+
   if (queue.length > 0) {
     const opponent = queue.shift();
 
@@ -16,7 +19,11 @@ function addToQueue(socket, io) {
     opponent.join(roomId);
     socket.join(roomId);
 
-    activeGames.set(roomId, { game, players: [opponent, socket] });
+    activeGames.set(roomId, {
+      game,
+      players: [opponent, socket],
+      symbols: { [opponent.id]: symbolA, [socket.id]: symbolB },
+    });
     socketRoom.set(opponent.id, roomId);
     socketRoom.set(socket.id, roomId);
 
@@ -50,6 +57,7 @@ function handleDisconnect(socket, io) {
     const opponent = room.players.find(p => p.id !== socket.id);
     if (opponent) {
       opponent.emit('opponent-left');
+      socketRoom.delete(opponent.id);
     }
     activeGames.delete(roomId);
   }

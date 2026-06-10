@@ -24,7 +24,11 @@ io.on('connection', (socket) => {
     const room = activeGames.get(roomId);
     if (!room) return;
 
-    const { game } = room;
+    const { game, symbols } = room;
+
+    // Seul le joueur dont c'est le tour peut envoyer un coup
+    if (symbols[socket.id] !== game.currentTurn) return;
+
     const result = game.makeMove(index);
     console.log('makeMove result:', JSON.stringify(result));
     if (!result.valid) return;

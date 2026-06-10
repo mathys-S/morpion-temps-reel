@@ -8,10 +8,11 @@ class TicTacToeGame {
   constructor() {
     this.board = Array(9).fill(null);
     this.currentTurn = 'X';
+    this.over = false;
   }
 
   makeMove(cellIndex) {
-    if (cellIndex < 0 || cellIndex > 8 || this.board[cellIndex] !== null) {
+    if (this.over || cellIndex < 0 || cellIndex > 8 || this.board[cellIndex] !== null) {
       return { valid: false };
     }
 
@@ -21,7 +22,9 @@ class TicTacToeGame {
     const winner = this._checkWinner();
     const isDraw = !winner && this.board.every(cell => cell !== null);
 
-    if (!winner && !isDraw) {
+    if (winner || isDraw) {
+      this.over = true;
+    } else {
       this.currentTurn = symbol === 'X' ? 'O' : 'X';
     }
 
